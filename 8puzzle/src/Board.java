@@ -3,7 +3,6 @@ import edu.princeton.cs.algs4.Queue;
 
 public class Board {
 
-    private int moves;
     private int[][] blocks;
     private int size;
     private int zeroi;
@@ -17,7 +16,6 @@ public class Board {
     public Board(int[][] blocks) {
         // this.blocks = blocks;
         size = blocks.length;
-        moves = 0;
         this.blocks = new int[size][size];
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++) {
@@ -46,7 +44,7 @@ public class Board {
     }
 
     private void setHamming() {
-        int res = moves;
+        int res = 0;
         int block;
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++) {
@@ -63,7 +61,7 @@ public class Board {
     }
 
     private void setManhattan() {
-        int res = moves;
+        int res = 0;
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++) {
                 if (blocks[i][j] == 0)
@@ -106,7 +104,7 @@ public class Board {
             blocksN[0][0] = blocksN[0][1];
             blocksN[0][1] = exch;
         }
-        return new Board(blocks);
+        return new Board(blocksN);
     }
 
     // does this board equal y?
@@ -116,6 +114,10 @@ public class Board {
         if (y.getClass() != this.getClass())
             return false;
         Board that = (Board) y;
+        if (this.dimension() != that.dimension())
+            return false;
+        if (this.size != that.size)
+            return false;
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
                 if (this.blocks[i][j] != that.blocks[i][j])
@@ -149,7 +151,6 @@ public class Board {
 
         res.blocks[zeroi][zeroj] = res.blocks[in][jn];
         res.blocks[in][jn] = 0;
-        res.moves = this.moves + 1;
         res.size = size;
         res.zeroi = in;
         res.zeroj = jn;
@@ -169,8 +170,8 @@ public class Board {
             }
             s.append("\n");
         }
-        s.append("h=" + this.hamming() + " m=" + this.manhattan());
-        s.append("\n");
+        // s.append("h=" + this.hamming() + " m=" + this.manhattan());
+        // s.append("\n");
         return s.toString();
     }
 
@@ -189,8 +190,9 @@ public class Board {
 
         Iterable<Board> it = b1.neighbors();
         System.out.print(b1);
+        System.out.print(b1.twin());
         for (Board b : it) {
-            System.out.print(b);
+            // System.out.print(b);
             // System.out.println("h=" + b.hamming() + " m=" + b.manhattan());
         }
 
