@@ -111,7 +111,7 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        if (y == this)
+        if (y == null || y == this)
             return true;
         if (y.getClass() != this.getClass())
             return false;
@@ -177,8 +177,9 @@ public class Board {
     // unit tests
     public static void main(String[] args) {
         // read blocks from file
-        String s = "D:\\Java\\Algoritms in java\\Workspace\\8puzzle\\testing\\8puzzle\\puzzle04.txt";
-        In in = new In(s);
+        // String s = "D:\\Java\\Algoritms in java\\Workspace\\8puzzle\\testing\\8puzzle\\puzzle04.txt";
+        // In in = new In(s);
+        In in = new In(args[0]);
         int n = in.readInt();
         int[][] blocks = new int[n][n];
         for (int i = 0; i < n; i++)

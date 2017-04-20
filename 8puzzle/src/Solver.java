@@ -3,12 +3,10 @@ import java.util.Comparator;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.Queue;
-import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
-    private Stack<Board> res;
     private int moves;
     private MinPQ<Board> openQ;
     private Queue<Board> closeQ = new Queue<>();
