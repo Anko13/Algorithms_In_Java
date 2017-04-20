@@ -1,32 +1,18 @@
-import java.util.Comparator;
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
-import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
     private int moves;
-    private Stack<Board> res = new Stack<>();
+    private Stack<Board> res;
     private MinPQ<ComparableBoard> openQ;
-    private Queue<ComparableBoard> closeQ = new Queue<>();
+    private Stack<ComparableBoard> closeQ = new Stack<>();
     private MinPQ<ComparableBoard> twinOpenQ;
-    private Queue<ComparableBoard> twinCloseQ = new Queue<>();
+    private Stack<ComparableBoard> twinCloseQ = new Stack<>();
     private boolean solvable = true;
-
-    private class ComparBoard implements Comparator<Board> {
-
-        @Override
-        public int compare(Board a, Board b) {
-            if (a.hamming() > b.hamming())
-                return 1;
-            if (a.hamming() < b.hamming())
-                return -1;
-            return 0;
-        }
-    }
 
     private class ComparableBoard implements Comparable<ComparableBoard> {
 
@@ -52,39 +38,47 @@ public class Solver {
                 return 1;
             if (this.priority < that.priority)
                 return -1;
+            if (this.board.hamming() + this.step > that.board.hamming() + that.step)
+                return 1;
+            if (this.board.hamming() + this.step < that.board.hamming() + that.step)
+                return -1;
             return 0;
         }
     }
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
+        res = new Stack<>();
         openQ = new MinPQ<ComparableBoard>();
         twinOpenQ = new MinPQ<ComparableBoard>();
         ComparableBoard thisboard = new ComparableBoard(initial, 0, null);
-        ComparableBoard twinboard = new ComparableBoard(initial.twin(), 1, null);
+        ComparableBoard twinboard = new ComparableBoard(initial.twin(), 0, null);
         openQ.insert(thisboard);
         twinOpenQ.insert(twinboard);
         // closeQ.enqueue(initial);
 
         int step = 0;
+        int twinboardstep = 0;
         Iterable<Board> childs;
         while (!thisboard.board.isGoal()) {
+
             step = thisboard.step + 1;
             childs = thisboard.board.neighbors();
             for (Board b : childs)
                 addChild(b, step, thisboard);
             thisboard = openQ.delMin();
-            closeQ.enqueue(thisboard);
+            closeQ.push(thisboard);
+            twinboardstep = twinboard.step + 1;
             childs = twinboard.board.neighbors();
             for (Board b : childs)
-                addtwinChild(b, step, twinboard);
+                addtwinChild(b, twinboardstep, twinboard);
             twinboard = twinOpenQ.delMin();
             if (twinboard.board.isGoal()) {
                 solvable = false;
-                break;
+                moves = -1;
+                return;
             }
-            twinCloseQ.enqueue(twinboard);
-            step++;
+            twinCloseQ.push(twinboard);
 
         }
         moves = thisboard.step;
@@ -143,17 +137,19 @@ public class Solver {
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
+        if (!solvable)
+            return null;
         return res;
     }
 
     // solve a slider puzzle (given below)
     public static void main(String[] args) {
 
-        String s = "D:\\Java\\Algoritms in java\\Workspace\\8puzzle\\testing\\8puzzle\\puzzle07.txt";
-        In in = new In(s);
+        // String s = "D:\\Java\\Algoritms in java\\Workspace\\8puzzle\\testing\\8puzzle\\puzzle33.txt";
+        // In in = new In(s);
 
         // create initial board from file
-        // In in = new In(args[0]);
+        In in = new In(args[0]);
         int n = in.readInt();
         int[][] blocks = new int[n][n];
         for (int i = 0; i < n; i++)
@@ -164,13 +160,10 @@ public class Solver {
         // solve the puzzle
         Solver solver = new Solver(initial);
 
-        // print solution to standard output
-        if (!solver.isSolvable())
-            StdOut.println("No solution possible");
-        else {
-            StdOut.println("Minimum number of moves = " + solver.moves());
-            for (Board board : solver.solution())
-                StdOut.println(board);
-        }
+        // print solution to standard output if (!solver.isSolvable()) StdOut.println("No solution possible"); else {
+        StdOut.println("Minimum number of moves = " + solver.moves());
+        for (Board board : solver.solution())
+            StdOut.println(board);
     }
+
 }
