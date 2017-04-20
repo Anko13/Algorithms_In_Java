@@ -22,9 +22,11 @@ public class Board {
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++) {
                 this.blocks[i][j] = blocks[i][j];
-                if (blocks[i][j] == 0)
+                if (blocks[i][j] == 0) {
                     zeroi = i;
-                zeroj = j;
+                    zeroj = j;
+                }
+
             }
         setHamming();
         setManhattan();
@@ -45,10 +47,13 @@ public class Board {
 
     private void setHamming() {
         int res = moves;
+        int block;
         for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                if (this.blocks[i][j] != 0 && blocks[i][j] != (i * size + j + 1))
+            for (int j = 0; j < size; j++) {
+                block = this.blocks[i][j];
+                if (block != 0 && block != (i * size + j + 1))
                     res++;
+            }
         hammingV = res;
     }
 
@@ -80,21 +85,28 @@ public class Board {
     }
 
     // a board that is obtained by exchanging any pair of blocks
+
     public Board twin() {
-        Board b = new Board();
-        b.blocks = new int[size][size];
+        int[][] blocksN = new int[size][size];
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
-                b.blocks[i][j] = this.blocks[i][j];
-
-        b.moves = moves;
-        b.size = size;
-        b.zeroi = zeroi;
-        b.zeroj = zeroj;
-        b.manhattanV = manhattanV;
-        b.hammingV = hammingV;
-
-        return b;
+                blocksN[i][j] = this.blocks[i][j];
+        int exch;
+        int s = size - 1;
+        if (blocksN[0][0] == 0) {
+            exch = blocksN[0][s];
+            blocksN[0][s] = blocksN[s][0];
+            blocksN[s][0] = exch;
+        } else if (blocksN[0][1] == 0) {
+            exch = blocksN[0][0];
+            blocksN[0][0] = blocksN[s][s];
+            blocksN[s][s] = exch;
+        } else {
+            exch = blocksN[0][0];
+            blocksN[0][0] = blocksN[0][1];
+            blocksN[0][1] = exch;
+        }
+        return new Board(blocks);
     }
 
     // does this board equal y?
@@ -127,11 +139,20 @@ public class Board {
 
     }
 
-    private Board swap(int i, int j) {
-        Board res = this.twin();
-        res.blocks[zeroi][zeroj] = res.blocks[i][j];
-        res.blocks[i][j] = 0;
+    private Board swap(int in, int jn) {
+        Board res = new Board();
+        res.blocks = new int[size][size];
+        for (int i = 0; i < size; i++)
+            for (int j = 0; j < size; j++) {
+                res.blocks[i][j] = blocks[i][j];
+            }
+
+        res.blocks[zeroi][zeroj] = res.blocks[in][jn];
+        res.blocks[in][jn] = 0;
         res.moves = this.moves + 1;
+        res.size = size;
+        res.zeroi = in;
+        res.zeroj = jn;
         res.setManhattan();
         res.setHamming();
         return res;
@@ -148,13 +169,15 @@ public class Board {
             }
             s.append("\n");
         }
+        s.append("h=" + this.hamming() + " m=" + this.manhattan());
+        s.append("\n");
         return s.toString();
     }
 
     // unit tests
     public static void main(String[] args) {
         // read blocks from file
-        String s = "D:\\Java\\Algoritms in java\\Workspace\\8puzzle\\testing\\8puzzle\\puzzle01.txt";
+        String s = "D:\\Java\\Algoritms in java\\Workspace\\8puzzle\\testing\\8puzzle\\puzzle04.txt";
         In in = new In(s);
         int n = in.readInt();
         int[][] blocks = new int[n][n];
@@ -164,9 +187,10 @@ public class Board {
         Board b1 = new Board(blocks);
 
         Iterable<Board> it = b1.neighbors();
+        System.out.print(b1);
         for (Board b : it) {
             System.out.print(b);
-            System.out.println("h=" + b.hamming() + " m=" + b.manhattan());
+            // System.out.println("h=" + b.hamming() + " m=" + b.manhattan());
         }
 
     }
