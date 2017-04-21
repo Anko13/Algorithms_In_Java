@@ -64,14 +64,19 @@ public class Solver {
 
             step = thisboard.step + 1;
             childs = thisboard.board.neighbors();
-            for (Board b : childs)
+            for (Board b : childs) {
+                if (b.equals(thisboard.parent.board))
+                    continue;
                 addChild(b, step, thisboard);
+            }
             thisboard = openQ.delMin();
             closeQ.push(thisboard);
             twinboardstep = twinboard.step + 1;
             childs = twinboard.board.neighbors();
-            for (Board b : childs)
+            for (Board b : childs) {
+                if (b.equals(twinboard.parent.board))continue;
                 addtwinChild(b, twinboardstep, twinboard);
+            }
             twinboard = twinOpenQ.delMin();
             if (twinboard.board.isGoal()) {
                 solvable = false;
