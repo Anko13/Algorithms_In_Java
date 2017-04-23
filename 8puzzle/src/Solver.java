@@ -8,10 +8,7 @@ public class Solver {
 
     private int moves;
     private Stack<Board> res;
-    private MinPQ<ComparableBoard> openQ;
-    private Stack<ComparableBoard> closeQ = new Stack<>();
-    private MinPQ<ComparableBoard> twinOpenQ;
-    private Stack<ComparableBoard> twinCloseQ = new Stack<>();
+
     private boolean solvable = true;
 
     private class ComparableBoard implements Comparable<ComparableBoard> {
@@ -38,19 +35,22 @@ public class Solver {
                 return 1;
             if (this.priority < that.priority)
                 return -1;
-            if (this.board.hamming() + this.step > that.board.hamming() + that.step)
-                return 1;
-            if (this.board.hamming() + this.step < that.board.hamming() + that.step)
-                return -1;
-            return 0;
+              return 0;
         }
     }
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
+
+        if (initial == null)
+            throw new NullPointerException();
+
         res = new Stack<>();
-        openQ = new MinPQ<ComparableBoard>();
-        twinOpenQ = new MinPQ<ComparableBoard>();
+        MinPQ<ComparableBoard> openQ = new MinPQ<ComparableBoard>();
+        Stack<ComparableBoard> closeQ = new Stack<>();
+        MinPQ<ComparableBoard> twinOpenQ = new MinPQ<ComparableBoard>();
+        Stack<ComparableBoard> twinCloseQ = new Stack<>();
+
         ComparableBoard thisboard = new ComparableBoard(initial, 0, null);
         ComparableBoard twinboard = new ComparableBoard(initial.twin(), 0, null);
         openQ.insert(thisboard);
@@ -65,17 +65,14 @@ public class Solver {
             step = thisboard.step + 1;
             childs = thisboard.board.neighbors();
             for (Board b : childs) {
-                if (b.equals(thisboard.parent.board))
-                    continue;
-                addChild(b, step, thisboard);
+                addChild(b, step, thisboard, openQ, closeQ);
             }
             thisboard = openQ.delMin();
             closeQ.push(thisboard);
             twinboardstep = twinboard.step + 1;
             childs = twinboard.board.neighbors();
             for (Board b : childs) {
-                if (b.equals(twinboard.parent.board))continue;
-                addtwinChild(b, twinboardstep, twinboard);
+                addChild(b, twinboardstep, twinboard, twinOpenQ, twinCloseQ);
             }
             twinboard = twinOpenQ.delMin();
             if (twinboard.board.isGoal()) {
@@ -98,7 +95,8 @@ public class Solver {
 
     // }
 
-    private void addChild(Board board, int step, ComparableBoard parent) {
+    private void addChild(Board board, int step, ComparableBoard parent, MinPQ<ComparableBoard> openQ,
+            Stack<ComparableBoard> closeQ) {
         for (ComparableBoard cb : closeQ)
             if (board.equals(cb.board))
                 return;
@@ -114,21 +112,12 @@ public class Solver {
         openQ.insert(new ComparableBoard(board, step, parent));
     }
 
-    private void addtwinChild(Board board, int step, ComparableBoard parent) {
-        for (ComparableBoard cb : twinCloseQ)
-            if (board.equals(cb.board))
-                return;
-        for (ComparableBoard cb : twinOpenQ)
-            if (board.equals(cb.board)) {
-                if (step < cb.step) {
-                    cb.step = step;
-                    cb.setPriority();
-                    cb.parent = parent;
-                }
-                return;
-            }
-        twinOpenQ.insert(new ComparableBoard(board, step, parent));
-    }
+    /*
+     * private void addtwinChild(Board board, int step, ComparableBoard parent) { for (ComparableBoard cb : twinCloseQ) if
+     * (board.equals(cb.board)) return; for (ComparableBoard cb : twinOpenQ) if (board.equals(cb.board)) { if (step < cb.step) {
+     * cb.step = step; cb.setPriority(); cb.parent = parent; } return; } twinOpenQ.insert(new ComparableBoard(board, step,
+     * parent)); }
+     */
 
     // is the initial board solvable?
     public boolean isSolvable() {

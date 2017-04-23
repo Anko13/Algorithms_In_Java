@@ -13,8 +13,6 @@ public class Board {
     // construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
 
-    
-    
     public Board(int[][] blocks) {
         // this.blocks = blocks;
         size = blocks.length;
@@ -37,7 +35,7 @@ public class Board {
 
     // board dimension n
     public int dimension() {
-        return size;
+        return blocks.length;
     }
 
     // number of blocks out of place
@@ -78,7 +76,7 @@ public class Board {
     public boolean isGoal() {
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
-                if (blocks[i][j] != (i * size + j + 1) && blocks[i][j] != 0)
+                if (blocks[i][j] != 0 && blocks[i][j] != (i * size + j + 1))
                     return false;
 
         return true;
@@ -111,15 +109,16 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        if (y == null || y == this)
+        if (y == this)
             return true;
-        if (y.getClass() != this.getClass())
+        if (y == null || y.getClass() != this.getClass())
             return false;
         Board that = (Board) y;
         if (this.dimension() != that.dimension())
             return false;
-        if (this.size != that.size)
+        if (this.size != that.size || this.manhattanV != that.manhattanV)
             return false;
+
         for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
                 if (this.blocks[i][j] != that.blocks[i][j])
